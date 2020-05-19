@@ -22,10 +22,10 @@ Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
 Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
                  num_labels, (hidden_layer_size + 1))
 a1 = [ones(size(X,1),1) X]
-y
+
 % Setup some useful variables
 m = size(X, 1)
-k = size(y,1)         
+
 % You need to return the following variables correctly 
 J = 0;
 Theta1_grad = zeros(size(Theta1));
@@ -63,39 +63,44 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-
+% Calculate layer 2 units
 a2 = sigmoid(a1*Theta1')
-
+% add zeros for bias unit of a2
 a2 = [ones(size(a2,1),1) a2]
-
+% calculate layer3/ final layer units
 h = sigmoid(a2*Theta2')
 
+%convert 1D y data set into a 2D matrix Y containing all zeros and single 1 in each row, 
+%whose index is the value of corresponding row value in y
 
 Y = zeros(m, num_labels);
 for i=1:m
   Y(i, y(i))= 1;
-end
-disp(Y)
+end;
 
 
+% calculate reguralarization param by adding all sqaured values of each Theta matrix and adjusting by lambda/2m
 regParam = lambda/(2*m) *( sum(sum(Theta1(:, 2:end).^2)) + sum(sum(Theta2(:, 2:end).^2)) )
+
+%Calculate cost using Logistic regression cost funda and then adding up all values of final cost matrix
+% add regularixation param to it 
 J = 1/m *sum(sum((-Y.* log(h) - (1-Y).* log(1-h)),2)) + regParam
 
-er3 = h-Y
-er2 = (er3*Theta2.* a2.*(1-a2))(:, 2:end)
+% Back propagation Starts here - 
 
+% Calculate error in final layer as - (prediction-Y)
+er3 = h-Y
+
+%Calculate error in middle layer by using e2
+er2 = (er3*Theta2.* a2.*(1-a2))(:, 2:end) % discard error for the bias unit
+
+% Calculate Delta of each unit of each layer using corresponding errors
 D1 = er2'*a1
 D2 = er3'*a2
 
-
+% Calculate gradient of Theta for each layer by using Delta and backpropagating
 Theta1_grad = D1./m + (lambda/m)*[zeros(size(Theta1,1), 1) Theta1(:, 2:end)]
 Theta2_grad = D2./m + (lambda/m)*[zeros(size(Theta2,1), 1) Theta2(:, 2:end)]
-
-
-
-
-
-
 
 
 
